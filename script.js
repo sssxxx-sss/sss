@@ -194,7 +194,14 @@ for (let i = 1; i < 5; i++) {
     loadFont(fonts[i]);
 }
 
-document.addEventListener('click', () => {
+let lastTapTime = 0;
+let isTouchDevice = false;
+
+function handleTap() {
+    const now = Date.now();
+    if (now - lastTapTime < 150) return;
+    lastTapTime = now;
+    
     currentIndex = (currentIndex + 1) % fonts.length;
     const fontName = fonts[currentIndex];
     
@@ -204,5 +211,17 @@ document.addEventListener('click', () => {
     
     for (let i = 1; i <= 3; i++) {
         loadFont(fonts[(currentIndex + i) % fonts.length]);
+    }
+}
+
+document.addEventListener('touchstart', (e) => {
+    isTouchDevice = true;
+    e.preventDefault();
+    handleTap();
+}, { passive: false });
+
+document.addEventListener('mousedown', (e) => {
+    if (!isTouchDevice) {
+        handleTap();
     }
 });
