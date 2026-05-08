@@ -49,7 +49,7 @@ function shuffle(array) {
 
 const fonts = shuffle(allFonts);
 
-function loadFont(fontName) {
+function ensureFontReady(fontName) {
     if (loadedFonts.has(fontName)) return Promise.resolve();
     
     return new Promise((resolve) => {
@@ -57,8 +57,13 @@ function loadFont(fontName) {
         link.rel = 'stylesheet';
         link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}&text=S&display=swap`;
         link.onload = () => {
-            loadedFonts.add(fontName);
-            resolve();
+            document.fonts.load(`100px "${fontName}"`, 'S').then(() => {
+                loadedFonts.add(fontName);
+                resolve();
+            }).catch(() => {
+                loadedFonts.add(fontName);
+                resolve();
+            });
         };
         link.onerror = () => {
             resolve();
@@ -67,21 +72,22 @@ function loadFont(fontName) {
     });
 }
 
-loadFont(fonts[0]).then(() => {
+// Preload first 10 fonts
+for (let i = 0; i < 10; i++) {
+    ensureFontReady(fonts[i]);
+}
+
+// Set initial font after it's ready
+ensureFontReady(fonts[0]).then(() => {
     sElement.style.fontFamily = `'${fonts[0]}', serif`;
 });
 
-for (let i = 1; i < 5; i++) {
-    loadFont(fonts[i]);
-}
-
-let lastTapTime = 0;
+let tapLocked = false;
 let lastTouchTime = 0;
 
 function handleTap() {
-    const now = Date.now();
-    if (now - lastTapTime < 300) return;
-    lastTapTime = now;
+    if (tapLocked) return;
+    tapLocked = true;
     
     tapCount++;
     counterElement.textContent = tapCount;
@@ -89,13 +95,16 @@ function handleTap() {
     currentIndex = (currentIndex + 1) % fonts.length;
     const fontName = fonts[currentIndex];
     
-    loadFont(fontName).then(() => {
+    ensureFontReady(fontName).then(() => {
         sElement.style.fontFamily = `'${fontName}', serif`;
     });
     
-    for (let i = 1; i <= 3; i++) {
-        loadFont(fonts[(currentIndex + i) % fonts.length]);
+    // Preload next 5 fonts
+    for (let i = 1; i <= 5; i++) {
+        ensureFontReady(fonts[(currentIndex + i) % fonts.length]);
     }
+    
+    setTimeout(() => { tapLocked = false; }, 200);
 }
 
 document.addEventListener('touchend', (e) => {
@@ -105,7 +114,7 @@ document.addEventListener('touchend', (e) => {
     handleTap();
 }, { passive: false, capture: true });
 
-document.addEventListener('click', (e) => {
+document.addEventListener('click', () => {
     if (Date.now() - lastTouchTime < 500) return;
     handleTap();
 });
