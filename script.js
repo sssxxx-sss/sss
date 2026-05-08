@@ -35,6 +35,7 @@ const allFonts = [
 let currentIndex = 0;
 let loadedFonts = new Set();
 let tapCount = 0;
+let ready = false;
 const sElement = document.getElementById('s');
 const counterElement = document.getElementById('counter');
 
@@ -72,21 +73,23 @@ function ensureFontReady(fontName) {
     });
 }
 
-// Preload first 10 fonts
-for (let i = 0; i < 10; i++) {
-    ensureFontReady(fonts[i]);
-}
-
-// Set initial font after it's ready
-ensureFontReady(fonts[0]).then(() => {
+// Preload first 30 fonts, then enable tapping
+const preloadBatch = fonts.slice(0, 30);
+Promise.all(preloadBatch.map(f => ensureFontReady(f))).then(() => {
     sElement.style.fontFamily = `'${fonts[0]}', serif`;
+    sElement.style.opacity = '1';
+    ready = true;
 });
+
+// Start hidden
+sElement.style.opacity = '0';
+sElement.style.transition = 'opacity 0.3s';
 
 let tapLocked = false;
 let lastTouchTime = 0;
 
 function handleTap() {
-    if (tapLocked) return;
+    if (!ready || tapLocked) return;
     tapLocked = true;
     
     tapCount++;
