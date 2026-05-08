@@ -33,11 +33,11 @@ const allFonts = [
 ];
 
 let currentIndex = 0;
-let loadedFonts = new Set();
 let tapCount = 0;
 let ready = false;
 const sElement = document.getElementById('s');
 const counterElement = document.getElementById('counter');
+const loadingElement = document.getElementById('loading');
 
 function shuffle(array) {
     const arr = [...array];
@@ -50,40 +50,34 @@ function shuffle(array) {
 
 const fonts = shuffle(allFonts);
 
-function ensureFontReady(fontName) {
-    if (loadedFonts.has(fontName)) return Promise.resolve();
-    
+function loadFontBatch(batch) {
     return new Promise((resolve) => {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}&text=S&display=swap`;
-        link.onload = () => {
-            document.fonts.load(`100px "${fontName}"`, 'S').then(() => {
-                loadedFonts.add(fontName);
-                resolve();
-            }).catch(() => {
-                loadedFonts.add(fontName);
-                resolve();
-            });
-        };
-        link.onerror = () => {
-            resolve();
-        };
+        const families = batch.map(f => `family=${encodeURIComponent(f)}`).join('&');
+        link.href = `https://fonts.googleapis.com/css2?${families}&text=S&display=swap`;
+        link.onload = resolve;
+        link.onerror = resolve;
         document.head.appendChild(link);
     });
 }
 
-// Preload first 30 fonts, then enable tapping
-const preloadBatch = fonts.slice(0, 30);
-Promise.all(preloadBatch.map(f => ensureFontReady(f))).then(() => {
-    sElement.style.fontFamily = `'${fonts[0]}', serif`;
-    sElement.style.opacity = '1';
-    ready = true;
-});
+// Load all fonts in batches of 25
+const batchSize = 25;
+const batches = [];
+for (let i = 0; i < fonts.length; i += batchSize) {
+    batches.push(fonts.slice(i, i + batchSize));
+}
 
-// Start hidden
-sElement.style.opacity = '0';
-sElement.style.transition = 'opacity 0.3s';
+// Load all batches, then wait for fonts to be fully rendered
+Promise.all(batches.map(batch => loadFontBatch(batch))).then(() => {
+    document.fonts.ready.then(() => {
+        sElement.style.fontFamily = `'${fonts[0]}', serif`;
+        sElement.classList.add('ready');
+        loadingElement.classList.add('hidden');
+        ready = true;
+    });
+});
 
 let tapLocked = false;
 let lastTouchTime = 0;
@@ -96,18 +90,9 @@ function handleTap() {
     counterElement.textContent = tapCount;
     
     currentIndex = (currentIndex + 1) % fonts.length;
-    const fontName = fonts[currentIndex];
+    sElement.style.fontFamily = `'${fonts[currentIndex]}', serif`;
     
-    ensureFontReady(fontName).then(() => {
-        sElement.style.fontFamily = `'${fontName}', serif`;
-    });
-    
-    // Preload next 5 fonts
-    for (let i = 1; i <= 5; i++) {
-        ensureFontReady(fonts[(currentIndex + i) % fonts.length]);
-    }
-    
-    setTimeout(() => { tapLocked = false; }, 200);
+    setTimeout(() => { tapLocked = false; }, 150);
 }
 
 document.addEventListener('touchend', (e) => {
