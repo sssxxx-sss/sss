@@ -194,7 +194,7 @@ for (let i = 1; i < 5; i++) {
     loadFont(fonts[i]);
 }
 
-sElement.addEventListener('pointerdown', (e) => {
+document.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     currentIndex = (currentIndex + 1) % fonts.length;
     const fontName = fonts[currentIndex];
