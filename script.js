@@ -194,13 +194,11 @@ for (let i = 1; i < 5; i++) {
     loadFont(fonts[i]);
 }
 
-let lastTapTime = 0;
-let isTouchDevice = false;
+let tapLocked = false;
 
 function handleTap() {
-    const now = Date.now();
-    if (now - lastTapTime < 150) return;
-    lastTapTime = now;
+    if (tapLocked) return;
+    tapLocked = true;
     
     currentIndex = (currentIndex + 1) % fonts.length;
     const fontName = fonts[currentIndex];
@@ -212,16 +210,16 @@ function handleTap() {
     for (let i = 1; i <= 3; i++) {
         loadFont(fonts[(currentIndex + i) % fonts.length]);
     }
+    
+    setTimeout(() => { tapLocked = false; }, 200);
 }
 
-document.addEventListener('touchstart', (e) => {
-    isTouchDevice = true;
+document.addEventListener('touchend', (e) => {
     e.preventDefault();
     handleTap();
 }, { passive: false });
 
-document.addEventListener('mousedown', (e) => {
-    if (!isTouchDevice) {
-        handleTap();
-    }
+document.addEventListener('click', () => {
+    if ('ontouchstart' in window) return;
+    handleTap();
 });
