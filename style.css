@@ -27,3 +27,14 @@ html, body {
     pointer-events: none;
     font-family: serif;
 }
+
+#counter {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+}
