@@ -11,6 +11,9 @@ html, body {
     background: white;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 #s {
@@ -20,13 +23,7 @@ html, body {
     transform: translate(-50%, -50%);
     font-size: max(48px, 10vh);
     color: black;
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
     line-height: 1;
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    pointer-events: none;
     font-family: serif;
 }
