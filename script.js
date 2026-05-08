@@ -194,14 +194,7 @@ for (let i = 1; i < 5; i++) {
     loadFont(fonts[i]);
 }
 
-let lastTapTime = 0;
-
-document.addEventListener('pointerdown', (e) => {
-    const now = Date.now();
-    if (now - lastTapTime < 100) return;
-    lastTapTime = now;
-    
-    e.preventDefault();
+document.addEventListener('click', () => {
     currentIndex = (currentIndex + 1) % fonts.length;
     const fontName = fonts[currentIndex];
     
