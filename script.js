@@ -180,4 +180,81 @@ const displayFonts = [
     'Romanesco','Ropa Sans','Rosario','Rosarivo','Rouge Script','Rowdies',
     'Rubik Beastly','Rubik Bubbles','Rubik Broken Fax','Rubik Burned','Rubik Dirt',
     'Rubik Distressed','Rubik Glitch','Rubik Iso','Rubik Marker Hatch','Rubik Maze',
-    'Rubik Microbe','Rubik Mono One','Rubik Moonrocks','Rubik Puddles
+    'Rubik Microbe','Rubik Mono One','Rubik Moonrocks','Rubik Puddles',
+    'Rubik Spray Paint','Rubik Storm','Rubik Vinyl','Rubik Wet Paint','Ruda',
+    'Rufina','Ruge Boogie','Ruluko','Rum Raisin','Ruslan Display','Ruthie','Rye',
+    'Salsa','Sanchez','Sancreek','Sansita','Sansita Swashed','Sarabun','Sarala',
+    'Sarina','Sarpanch','Sawarabi Gothic','Scada','Scheherazade New','Schoolbell',
+    'Scope One','Seaweed Script','Send Flowers','Sevillana','Seymour One',
+    'Shadows Into Light Two','Shalimar','Shanti','Share','Share Tech','Share Tech Mono',
+    'Shippori Antique','Shippori Mincho','Shojumaru','Short Stack','Shrikhand',
+    'Siemreap','Sigmar One','Simonetta','Single Day','Sintony','Sirin Stencil',
+    'Skranji','Slabo 13px','Slackey','Smokum','Smythe','Sniglet','Snippet',
+    'Snowburst One','Sofadi One','Solway','Song Myung','Sonsie One',
+    'Sorts Mill Goudy','Spicy Rice','Spinnaker','Spirax','Spline Sans',
+    'Squada One','Sree Krushnadevaraya','Sriracha','Srisakdi','Stalemate',
+    'Stardos Stencil','Stint Ultra Condensed','Stint Ultra Expanded','Stoke',
+    'Strait','Style Script','Sue Ellen Francisco','Sulphur Point','Sumana',
+    'Sunflower','Sunshiney','Supermercado','Sura','Suranna','Suravaram',
+    'Suwannaphum','Swanky and Moo Moo','Syncopate','Syne','Tac One','Tajawal',
+    'Tangerine','Taprom','Tauri','Telex','Tenali Ramakrishna','Texturina',
+    'Texturina Alt','Thasadith','The Nautigal','Tienne','Tilt Neon','Tilt Prism',
+    'Tilt Warp','Timmana','Trispace','Trocchi','Trochut','Truculenta','Trykker',
+    'Tulpen One','Turret Road','Twinkle Star','Uchen','Ultra','Uncial Antiqua',
+    'Underdog','Unica One','UnifrakturCook','Unlock','Unna','Updock',
+    'Vampiro One','Varela','Varta','Vecna','Vesper Libre','Viaoda Libre','Vibes',
+    'Vibur','Vidaloka','Viga','Vina Sans','Voces','Vollkorn SC','Voltaire',
+    'Waiting for the Sunrise','Wallpoet','Walter Turncoat','Warnes','Wendy One',
+    'Whisper','WindSong','Wire One','Work Sans','Xanh Mono','Yalta',
+    'Yanone Kaffeesatz','Yellowtail','Yeseva One','Yesteryear','Yomogi','Young Serif',
+    'Yrsa','Yuji Boku','Yuji Hentaigana Akari','Yuji Mai','Yuji Syuku',
+    'ZCOOL QingKe HuangYou','ZCOOL XiaoWei','Zen Antique','Zen Antique Soft',
+    'Zen Dots','Zen Kaku Gothic Antique','Zen Kaku Gothic New','Zen Kurenaido',
+    'Zen Loop','Zen Maru Gothic','Zen Old Mincho','Zen Tokyo','Zhi Mang Xing',
+    'Zilla Slab Highlight'
+];
+
+// Generate all font variations
+const allVariations = [];
+for (const [family, weights] of Object.entries(multiWeightFamilies)) {
+    for (const weight of weights) {
+        allVariations.push({ family, weight });
+    }
+}
+for (const family of displayFonts) {
+    allVariations.push({ family, weight: 400 });
+}
+
+// Shuffle
+function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+const shuffled = shuffle(allVariations);
+
+// Create lookup map
+const variationMap = new Map();
+shuffled.forEach((v, i) => {
+    variationMap.set(`${v.family}:${v.weight}`, i);
+});
+
+// Create elements
+const container = document.getElementById('s-container');
+const elements = [];
+shuffled.forEach((font, i) => {
+    const div = document.createElement('div');
+    div.className = 's-letter';
+    div.textContent = 'S';
+    div.style.fontFamily = `'\${font.family}', serif`;
+    div.style.fontWeight = font.weight;
+    container.appendChild(div);
+    elements.push({ element: div, font, ready: false });
+});
+
+// Track ready variations
+const ready
