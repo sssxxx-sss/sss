@@ -35,9 +35,6 @@ const allFonts = [
 let currentIndex = 0;
 let tapCount = 0;
 let ready = false;
-const sElement = document.getElementById('s');
-const counterElement = document.getElementById('counter');
-const loadingElement = document.getElementById('loading');
 
 function shuffle(array) {
     const arr = [...array];
@@ -49,8 +46,31 @@ function shuffle(array) {
 }
 
 const fonts = shuffle(allFonts);
+const container = document.getElementById('s-container');
+const loading = document.getElementById('loading');
+const game = document.getElementById('game');
+const counter = document.getElementById('counter');
 
-function loadFontBatch(batch) {
+// Create all S elements - each pre-rendered in its own font
+const letters = [];
+fonts.forEach((font, i) => {
+    const div = document.createElement('div');
+    div.className = 's-letter';
+    div.textContent = 'S';
+    div.style.fontFamily = `'${font}', serif`;
+    div.style.opacity = i === 0 ? '1' : '0';
+    container.appendChild(div);
+    letters.push(div);
+});
+
+// Load all fonts in batches via Google Fonts
+const batchSize = 25;
+const batches = [];
+for (let i = 0; i < fonts.length; i += batchSize) {
+    batches.push(fonts.slice(i, i + batchSize));
+}
+
+function loadBatch(batch) {
     return new Promise((resolve) => {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -62,19 +82,11 @@ function loadFontBatch(batch) {
     });
 }
 
-// Load all fonts in batches of 25
-const batchSize = 25;
-const batches = [];
-for (let i = 0; i < fonts.length; i += batchSize) {
-    batches.push(fonts.slice(i, i + batchSize));
-}
-
-// Load all batches, then wait for fonts to be fully rendered
-Promise.all(batches.map(batch => loadFontBatch(batch))).then(() => {
+// Wait for all fonts to load and render, then enable the game
+Promise.all(batches.map(batch => loadBatch(batch))).then(() => {
     document.fonts.ready.then(() => {
-        sElement.style.fontFamily = `'${fonts[0]}', serif`;
-        sElement.classList.add('ready');
-        loadingElement.classList.add('hidden');
+        loading.style.display = 'none';
+        game.style.display = 'block';
         ready = true;
     });
 });
@@ -87,10 +99,12 @@ function handleTap() {
     tapLocked = true;
     
     tapCount++;
-    counterElement.textContent = tapCount;
+    counter.textContent = tapCount;
     
+    // Hide current, show next - instant swap, no font loading
+    letters[currentIndex].style.opacity = '0';
     currentIndex = (currentIndex + 1) % fonts.length;
-    sElement.style.fontFamily = `'${fonts[currentIndex]}', serif`;
+    letters[currentIndex].style.opacity = '1';
     
     setTimeout(() => { tapLocked = false; }, 150);
 }
